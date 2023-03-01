@@ -47,6 +47,8 @@ def process_data(src, dist):
     df.pop('datum_do')
 
     #print('Saving processed data...')
+
+    df = df[sorted(df)]
     df.to_csv(dist, index=False)
 
     #print('Finished!')
