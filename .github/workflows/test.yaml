@@ -51,7 +51,7 @@ jobs:
           token: ${{ secrets.SECRET_TOKEN }}
 
       - name: Install dependencies
-        run: pip install "poetry==$POETRY_VERSION"
+        run: pip install "poetry==1.0"
 
       - name: Run tests
         run: pytest
