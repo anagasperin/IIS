@@ -63,10 +63,14 @@ jobs:
 
       - name: Commit changes
         run: |
-          dvc add data
           git add data.dvc
+          git add data/raw/data.json
           git commit -m 'Github Actions Bot Commit data'
           git push
+          git rm -r --cached 'data'
+          git commit -m "stop tracking data"
+          dvc add 'data'
+          dvc commit
           dvc push -r origin
 
   preprocess_air_data:
@@ -122,10 +126,14 @@ jobs:
 
       - name: Commit changes
         run: |
-          dvc add data
           git add data.dvc
+          git add data/raw/data.json
           git commit -m 'Github Actions Bot Commit data'
           git push
+          git rm -r --cached 'data'
+          git commit -m "stop tracking data"
+          dvc add 'data'
+          dvc commit
           dvc push -r origin
 
   fetch_weather_data:
@@ -185,10 +193,14 @@ jobs:
 
       - name: Commit changes
         run: |
-          dvc add data
           git add data.dvc
+          git add data/raw/weather/data.json
           git commit -m 'Github Actions Bot Commit data'
           git push
+          git rm -r --cached 'data'
+          git commit -m "stop tracking data"
+          dvc add 'data'
+          dvc commit
           dvc push -r origin
 
   preprocess_weather_data:
@@ -248,10 +260,14 @@ jobs:
 
       - name: Commit changes
         run: |
-          dvc add data
           git add data.dvc
-          git commit -m 'Github Actions Bot Commit data.dvc'
+          git add data/raw/weather/data.json
+          git commit -m 'Github Actions Bot Commit data'
           git push
+          git rm -r --cached 'data'
+          git commit -m "stop tracking data"
+          dvc add 'data'
+          dvc commit
           dvc push -r origin
 
   merge_processed_data:
@@ -311,10 +327,15 @@ jobs:
 
       - name: Commit changes
         run: |
-          dvc add data
           git add data.dvc
+          git add data/preprocessed/data_air.csv
+          git add data/preprocessed/data_we.csv
           git commit -m 'Github Actions Bot Commit data'
           git push
+          git rm -r --cached 'data'
+          git commit -m "stop tracking data"
+          dvc add 'data'
+          dvc commit
           dvc push -r origin
 
   test:
