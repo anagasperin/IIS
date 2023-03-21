@@ -9,56 +9,57 @@ on:
     - cron: "0 13 * * *"
 
 jobs:
-    fetch_air_data:
-      runs-on: ubuntu-latest
-      outputs:
-        sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
-      permissions:
-        contents: write
-      steps:
-        - uses: actions/checkout@v2
-          with:
-            fetch-depth: 0
-        - name: Setup Python
-          uses: actions/setup-python@v2
-          with:
-          python-version: ">=3.9.12"
-          token: ${{ secrets.SECRET_TOKEN }}
-          node-version: '16'
+  fetch_air_data:
+    runs-on: ubuntu-latest
+    outputs:
+      sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+        python-version: ">=3.9.12"
+        token: ${{ secrets.SECRET_TOKEN }}
+        node-version: '16'
 
-      - name: Install Poetry
-        run: pip install poetry
+    - name: Install Poetry
+      run: pip install poetry
 
-      - name: Install dependencies
+    - name: Install dependencies
+      run: |
+        poetry install --no-root --without dev
+
+    - name: Setup Dagshub
+      run: |
+        dvc remote modify origin --local auth basic
+        dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+        dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
+    - name: Setup git config
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "anagasperin99@users.noreply.github.com"
+    - name: Pull changes
+      run: |
+        git pull
+        dvc pull
+    - name: Run tests
+      run: pytest test/test_air_data.py
+
+    - name: Fetch data
+      run: python ./src/data/fetch_air_data.py
+
+    - name: Commit changes
         run: |
-          poetry install --no-root --without dev
-
-      - name: Setup Dagshub
-        run: |
-          dvc remote modify origin --local auth basic
-          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "anagasperin99@users.noreply.github.com"
-      - name: Pull changes
-        run: |
-          git pull
-          dvc pull
-      - name: Run tests
-        run: pytest test/test_air_data.py
-
-      - name: Fetch data
-        run: python ./src/data/fetch_air_data.py
-
-      - name: Commit changes
-          run: |
-            dvc add data
-            git add data.dvc
-            git commit -m 'Github Actions Bot Commit data'
-            git push
-            dvc push -r origin
+          dvc add data
+          git add data.dvc
+          git commit -m 'Github Actions Bot Commit data'
+          git push
+          dvc push -r origin
+          
     preprocess_air_data:
       needs: fetch_air_data
       runs-on: ubuntu-latest
