@@ -6,13 +6,18 @@ authors = ["anagasperin <anagasperin99@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9.12"
+python = ">=3.9.12,<4"
 numpy = "^1.24.2"
 pandas = "^1.5.3"
 sklearn = "^0.0.post1"
 flask = "^2.2.3"
 scikit-learn = "^1.2.1"
 pytest = "^7.2.2"
+datetime = "^5.1"
+statsmodels = "^0.13.5"
+flask-cors = "^3.0.10"
+dvc = "^2.51.0"
+requests = "^2.28.2"
 
 
 [build-system]
