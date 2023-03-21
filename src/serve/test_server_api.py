@@ -1,4 +1,4 @@
-from src.serve.server import app
+from .server import app
 
 
 def test_api_server():

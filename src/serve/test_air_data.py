@@ -1,6 +1,5 @@
 import requests
 
-
 def test_air_api():
     url = "https://arsoxmlwrapper.app.grega.xyz/api/air/archive"
     response = requests.get(url)
