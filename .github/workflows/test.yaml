@@ -59,7 +59,7 @@ jobs:
           dvc pull
 
       - name: Fetch data
-        run: python ./src/data/fetch_air_data.py
+        run: poetry run python ./src/data/fetch_air_data.py
 
       - name: Commit changes
         run: |
@@ -172,10 +172,6 @@ jobs:
         run: |
           poetry install --no-root --without dev
 
-      # - name: Fetch data
-      #   run: |
-      #     poetry run python src/data/fetch_data.py
-
       - name: Install DVC
         run: |
           pip install dvc
@@ -196,8 +192,8 @@ jobs:
           git pull
           dvc pull
 
-      # - name: Fetch data
-      #   run: poetry run python ./src/data/fetch_weather_data.py
+      - name: Fetch data
+        run: python ./src/data/fetch_weather_data.py
 
       - name: Commit changes
         run: |
@@ -242,10 +238,6 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install --no-root --without dev
-
-      # - name: Fetch data
-      #   run: |
-      #     poetry run python src/data/fetch_data.py
 
       - name: Install DVC
         run: |
@@ -313,10 +305,6 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install --no-root --without dev
-
-      # - name: Fetch data
-      #   run: |
-      #     poetry run python src/data/fetch_data.py
 
       - name: Install DVC
         run: |

@@ -56,7 +56,7 @@ def forecast():
 
     root_dir = os.path.abspath(os.path.join(
         os.path.dirname(__file__), '../..'))
-    model_path = os.path.join(root_dir, 'models', 'var')
+    model_path = os.path.join(root_dir, 'models', 'linear')
 
     f = open(model_path, 'rb')
     model = pickle.load(f)
