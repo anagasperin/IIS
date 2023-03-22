@@ -262,17 +262,17 @@ jobs:
       - name: Process data
         run: poetry run python ./src/data/preprocess_weather_data.py
 
-      - name: Commit changes
-        run: |
-          git add data.dvc
-          git add data/preprocessed/data_we.csv
-          git commit -m 'Github Actions Bot Commit data'
-          git push
-          git rm -r --cached 'data'
-          git commit -m "stop tracking data"
-          dvc add 'data'
-          dvc commit
-          dvc push -r origin
+      # - name: Commit changes
+      #   run: |
+      #     git add data.dvc
+      #     git add data/preprocessed/data_we.csv
+      #     git commit -m 'Github Actions Bot Commit data'
+      #     git push
+      #     git rm -r --cached 'data'
+      #     git commit -m "stop tracking data"
+      #     dvc add 'data'
+      #     dvc commit
+      #     dvc push -r origin
 
   merge_processed_data:
   
