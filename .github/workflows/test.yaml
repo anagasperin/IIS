@@ -131,7 +131,7 @@ jobs:
       - name: Commit changes
         run: |
           git add data.dvc
-          git add data/raw/data.json
+          git add data/preprocessed/data_air.json
           git commit -m 'Github Actions Bot Commit data'
           git push
           git rm -r --cached 'data'
@@ -273,7 +273,7 @@ jobs:
       - name: Commit changes
         run: |
           git add data.dvc
-          git add data/raw/weather/data.json
+          git add data/preprocessed/data_we.json
           git commit -m 'Github Actions Bot Commit data'
           git push
           git rm -r --cached 'data'
@@ -344,8 +344,7 @@ jobs:
       - name: Commit changes
         run: |
           git add data.dvc
-          git add data/preprocessed/data_air.csv
-          git add data/preprocessed/data_we.csv
+          git add data/processed/data.csv
           git commit -m 'Github Actions Bot Commit data'
           git push
           git rm -r --cached 'data'
