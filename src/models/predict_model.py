@@ -60,7 +60,7 @@ if __name__ == '__main__':
         os.path.dirname(__file__), '../..'))
 
     data_path = os.path.join(root_dir, 'data', 'processed', 'data.csv')
-    model_path = os.path.join(root_dir, 'models', 'model.pickle')
+    model_path = os.path.join(root_dir, 'models', 'linear')
     train_metrics_path = os.path.join(root_dir, 'reports', 'train_metrics.txt')
     metrics_path = os.path.join(root_dir, 'reports', 'metrics.txt')
 
