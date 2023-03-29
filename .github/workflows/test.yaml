@@ -35,12 +35,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if poetry install --no-root --without-dev 2>&1 | grep -q '_WheelFileValidationError'; then
+          if poetry install 2>&1 | grep -q '_WheelFileValidationError'; then
             echo "::warning file=pyproject.toml,line=1,col=1::_WheelFileValidationError was converted into a warning"
           fi
 
       - name: Run tests
         run: |
+          pip install pytest
           poetry run pytest
 
   fetch_air_data:
