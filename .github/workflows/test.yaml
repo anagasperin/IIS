@@ -37,7 +37,7 @@ jobs:
       - name: Run tests
         run: |
           pip install pytest
-          poetry run pytest test/test_server_api.py
+          poetry run pytest serve/test_server_api.py
 
   fetch_air_data:
 
