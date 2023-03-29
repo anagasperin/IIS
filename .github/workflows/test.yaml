@@ -38,6 +38,9 @@ jobs:
           if poetry install --no-root --without dev 2>&1 | grep -q '_WheelFileValidationError'; then
             echo "::warning file=test.py,line=1,col=1::_WheelFileValidationError was converted into a warning"
           fi
+
+      - name: Install pytest
+        run: pip install pytest
       
       - name: Run tests
         run: |
