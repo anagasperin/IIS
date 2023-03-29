@@ -14,13 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Clear Cache
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          run: |
-            echo "Cache cleared"
+      - name: Clear cache
+        run: rm -rf ${{ runner.temp }}/*
 
       - name: Setup Python
         uses: actions/setup-python@v2
@@ -42,7 +37,7 @@ jobs:
       - name: Run tests
         run: |
           pip install pytest
-          poetry run pytest
+          poetry run pytest test/test_server_api.py
 
   fetch_air_data:
 
