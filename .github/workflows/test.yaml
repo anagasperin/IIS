@@ -9,29 +9,6 @@ on:
     - cron: "0 13 * * *"
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ">=3.9.12"
-          token: ${{ secrets.SECRET_TOKEN }}
-          node-version: '16'
-
-      - name: Install Poetry
-        run: pip install poetry
-
-      - name: Install dependencies
-        run: |
-          poetry install --no-root --without dev
-      
-      - name: Run tests
-        run: |
-          poetry run pytest
 
   fetch_air_data:
 
@@ -510,25 +487,28 @@ jobs:
             git commit -m 'Github Actions Bot Commit data'
             git push
             dvc push -r origin      
-    push_job:
-      runs-on: ubuntu-latest
-      if: github.event_name == 'push'
-      steps:
-        - uses: actions/checkout@v3
-          with:
-            fetch-depth: 0
-        - name: Setup Python
-          uses: actions/setup-python@v3
-          with:
-            python-version: ">=3.9.12"
-            token: ${{ secrets.SECRET_TOKEN }}
-            node-version: '16'
+    
 
-        - uses: iterative/setup-dvc@v1
+    test:
+        runs-on: ubuntu-latest
+        if: github.event_name == 'push'
+        steps:
+          - uses: actions/checkout@v2
 
-        - name: Install dependencies
-          run: |
-            pip install poetry
-            poetry install --no-root
-        - name: Run test
-          run: poetry run pytest test/test_server_api.py
+          - name: Setup Python
+            uses: actions/setup-python@v2
+            with:
+              python-version: ">=3.9.12"
+              token: ${{ secrets.SECRET_TOKEN }}
+              node-version: '16'
+
+          - name: Install Poetry
+            run: pip install poetry
+
+          - name: Install dependencies
+            run: |
+              poetry install --no-root --without dev
+          
+          - name: Run tests
+            run: |
+              poetry run pytest
