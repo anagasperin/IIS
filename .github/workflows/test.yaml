@@ -25,7 +25,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10.7"
+          python-version: ">=3.10.7"
           token: ${{ secrets.SECRET_TOKEN  }}
 
       - uses: iterative/setup-dvc@v1
@@ -196,7 +196,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10.7"
+          python-version: ">=3.10.7"
           token: ${{ secrets.SECRET_TOKEN }}
           node-version: '16'
 
@@ -263,7 +263,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10.7"
+          python-version: ">=3.10.7"
           token: ${{ secrets.SECRET_TOKEN  }}
           node-version: '16'
 
@@ -330,7 +330,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10.7"
+          python-version: ">=3.10.7"
           token: ${{ secrets.SECRET_TOKEN }}
           node-version: '16'
 
@@ -390,7 +390,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10.7"
+          python-version: ">=3.10.7"
           token: ${{ secrets.SECRET_TOKEN  }}
           node-version: '16'
 
@@ -447,7 +447,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10.7"
+          python-version: ">=3.10.7"
           token: ${{ secrets.SECRET_TOKEN  }}
           node-version: '16'
 
@@ -501,7 +501,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10.7"
+          python-version: ">=3.10.7"
           token: ${{ secrets.SECRET_TOKEN  }}
           node-version: '16'
 
