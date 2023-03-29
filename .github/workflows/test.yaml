@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: "3.10.7"
-          token: ${{ secrets.IIS_TOKEN }}
+          token: ${{ secrets.SECRET_TOKEN  }}
 
       - uses: iterative/setup-dvc@v1
 
