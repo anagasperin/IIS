@@ -41,7 +41,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest
+          poetry run pytest
 
   fetch_air_data:
 
