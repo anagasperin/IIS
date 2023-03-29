@@ -9,10 +9,8 @@ on:
     - cron: "0 13 * * *"
 
 jobs:
-
   fetch_air_data:
 
-    needs: test
     runs-on: ubuntu-latest
     
     outputs:
