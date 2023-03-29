@@ -40,7 +40,9 @@ jobs:
           fi
 
       - name: Install pytest
-        run: pip install pytest
+        run: |
+          pip install pytest
+          pip install pandas
       
       - name: Run tests
         run: |
