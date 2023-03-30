@@ -419,7 +419,7 @@ jobs:
           git pull
           dvc pull
       - name: Validate data
-        run: poetry run data_validation
+        run: poetry run python ./src/data/data_validation.py
 
       - name: Deploy DataDocs to Netlify
         uses: nwtgck/actions-netlify@v1.2
@@ -478,7 +478,7 @@ jobs:
           dvc pull
 
       - name: Test data stability
-        run: poetry run data_stability
+        run: poetry run python ./src/data/data_stability.py
 
       - name: Commit changes
         run: |
@@ -534,8 +534,8 @@ jobs:
 
       - name: Post data pipeline actions
         run: |
-          poetry run update_reference
-          poetry run split_train_test
+          poetry run python ./src/data/update_reference.py
+          poetry run python ./src/data/split_train_test.py
 
       - name: Commit changes
         run: |
