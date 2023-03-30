@@ -539,6 +539,8 @@ jobs:
 
       - name: Commit changes
         run: |
+          git rm -r --cached 'data'
+          git commit -m "stop tracking data"
           dvc add data
           git add .
           git commit -m 'Github Actions Bot Commit data'
