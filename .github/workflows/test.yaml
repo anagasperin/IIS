@@ -1,43 +1,42 @@
 name: Workflow
 
-on:
+on: 
   push:
-    branches:
+    branches: 
       - main
 
   schedule:
     - cron: "0 13 * * *"
 
+  workflow_dispatch:
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Clear cache
-        run: rm -rf ${{ runner.temp }}/*
+      - name: Install Poetry
+        run: pipx install poetry
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: ">=3.10.7"
-          token: ${{ secrets.SECRET_TOKEN  }}
+          python-version: "3.10.7"
+          cache: poetry
 
       - uses: iterative/setup-dvc@v1
 
-      - name: Install Poetry
-        run: pip install poetry
-
       - name: Install dependencies
         run: |
-          if poetry install 2>&1 | grep -q '_WheelFileValidationError'; then
-            echo "::warning file=pyproject.toml,line=1,col=1::_WheelFileValidationError was converted into a warning"
-          fi
+          poetry install --no-root --without dev
+
+      - name: Install pytest
+        run: pip install pytest
 
       - name: Run tests
         run: |
-          pip install pytest
-          poetry run pytest src/serve/test_server_api.py
+          poetry run pytest 
 
   fetch_air_data:
 
@@ -51,21 +50,20 @@ jobs:
     permissions:
       contents: write
 
-    steps:
+    steps:    
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ">=3.10.7"
-          token: ${{ secrets.SECRET_TOKEN }}
-          node-version: '16'
-
       - name: Install Poetry
-        run: pip install poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.7"
+          cache: poetry
 
       - name: Install dependencies
         run: |
@@ -94,17 +92,18 @@ jobs:
       - name: Fetch data
         run: poetry run python ./src/data/fetch_air_data.py
 
+      
+
       - name: Commit changes
         run: |
-          git add data.dvc
           git add data/raw/data.json
           git commit -m 'Github Actions Bot Commit data'
-          git push
-          git rm -r --cached data
-          git commit -m "stop tracking data"
-          dvc add data
-          dvc commit
-          dvc push -r origin
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
 
   preprocess_air_data:
 
@@ -120,19 +119,18 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ">=3.10.7"
-          token: ${{ secrets.SECRET_TOKEN }}
-          node-version: '16'
-
       - name: Install Poetry
-        run: pip install poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.7"
+          cache: poetry
 
       - name: Install dependencies
         run: |
@@ -163,15 +161,14 @@ jobs:
 
       - name: Commit changes
         run: |
-          git add data.dvc
           git add data/preprocessed/data_air.csv
           git commit -m 'Github Actions Bot Commit data'
-          git push
-          git rm -r --cached data
-          git commit -m "stop tracking data"
-          dvc add data
-          dvc commit
-          dvc push -r origin
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
 
   fetch_weather_data:
   
@@ -187,19 +184,18 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ">=3.10.7"
-          token: ${{ secrets.SECRET_TOKEN }}
-          node-version: '16'
-
       - name: Install Poetry
-        run: pip install poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.7"
+          cache: poetry
 
       - name: Install dependencies
         run: |
@@ -230,15 +226,14 @@ jobs:
 
       - name: Commit changes
         run: |
-          git add data.dvc
           git add data/raw/weather/data.json
           git commit -m 'Github Actions Bot Commit data'
-          git push
-          git rm -r --cached data
-          git commit -m "stop tracking data"
-          dvc add data
-          dvc commit
-          dvc push -r origin
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
 
   preprocess_weather_data:
   
@@ -254,19 +249,18 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ">=3.10.7"
-          token: ${{ secrets.SECRET_TOKEN  }}
-          node-version: '16'
-
       - name: Install Poetry
-        run: pip install poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.7"
+          cache: poetry
 
       - name: Install dependencies
         run: |
@@ -295,17 +289,23 @@ jobs:
       - name: Process data
         run: poetry run python ./src/data/preprocess_weather_data.py
 
-      - name: Commit changes
+      - name: Check if data file has changed
+        id: check_changes
         run: |
-          git add data.dvc
+          git diff --quiet data/preprocessed/data_we.csv || echo "::set-output name=CHANGED::true"
+        shell: bash
+        
+      - name: Commit changes
+        if: steps.check_changes.outputs.CHANGED == 'true'
+        run: |
           git add data/preprocessed/data_we.csv
           git commit -m 'Github Actions Bot Commit data'
-          git push
-          git rm -r --cached data
-          git commit -m "stop tracking data"
-          dvc add data
-          dvc commit
-          dvc push -r origin
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
 
   merge_processed_data:
   
@@ -321,19 +321,18 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ">=3.10.7"
-          token: ${{ secrets.SECRET_TOKEN }}
-          node-version: '16'
-
       - name: Install Poetry
-        run: pip install poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.7"
+          cache: poetry
 
       - name: Install dependencies
         run: |
@@ -364,15 +363,14 @@ jobs:
 
       - name: Commit changes
         run: |
-          git add data.dvc
-          git add data/processed/data.csv
+          git add data/processed/current_data.csv
           git commit -m 'Github Actions Bot Commit data'
-          git push
-          git rm -r --cached data
-          git commit -m "stop tracking data"
-          dvc add data
-          dvc commit
-          dvc push -r origin
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
 
   validate_data:
     needs: merge_processed_data
@@ -382,22 +380,24 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ">=3.10.7"
-          token: ${{ secrets.SECRET_TOKEN  }}
-          node-version: '16'
 
-      - uses: iterative/setup-dvc@v1
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.7"
+          cache: poetry
 
       - name: Install dependencies
         run: |
-          pip install poetry
-          poetry install --no-root
+          poetry install --no-root --without dev
+
+      - uses: iterative/setup-dvc@v1
 
       - name: Install DVC
         run: |
@@ -407,7 +407,7 @@ jobs:
         run: |
           dvc remote modify origin --local auth basic
           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_TOKEN }}
+          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
       - name: Setup git config
         run: |
@@ -430,7 +430,6 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
          
-
   test_stability_data:
     needs: merge_processed_data
     runs-on: ubuntu-latest
@@ -439,22 +438,24 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ">=3.10.7"
-          token: ${{ secrets.SECRET_TOKEN  }}
-          node-version: '16'
 
-      - uses: iterative/setup-dvc@v1
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.7"
+          cache: poetry
 
       - name: Install dependencies
         run: |
-          pip install poetry
-          poetry install --no-root
+          poetry install --no-root --without dev
+
+      - uses: iterative/setup-dvc@v1
       
       - name: Install DVC
         run: |
@@ -464,7 +465,7 @@ jobs:
         run: |
           dvc remote modify origin --local auth basic
           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_TOKEN }}
+          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
       - name: Setup git config
         run: |
@@ -493,22 +494,23 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ">=3.10.7"
-          token: ${{ secrets.SECRET_TOKEN  }}
-          node-version: '16'
+      - name: Install Poetry
+        run: pipx install poetry
 
-      - uses: iterative/setup-dvc@v1
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.7"
+          cache: poetry
 
       - name: Install dependencies
         run: |
-          pip install poetry
-          poetry install --no-root
+          poetry install --no-root --without dev
+
+      - uses: iterative/setup-dvc@v1
 
       - name: Install DVC
         run: |
@@ -518,7 +520,7 @@ jobs:
         run: |
           dvc remote modify origin --local auth basic
           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_TOKEN }}
+          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
       - name: Setup git config
         run: |
