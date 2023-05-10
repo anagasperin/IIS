@@ -545,4 +545,4 @@ jobs:
           git add .
           git commit -m 'Github Actions Bot Commit data'
           git push
-          dvc push -r origin  
+          dvc push -r origin
