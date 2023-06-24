@@ -1,548 +1,548 @@
-name: Workflow
+# name: Workflow
 
-on: 
-  push:
-    branches: 
-      - main
+# on: 
+#   push:
+#     branches: 
+#       - main
 
-  schedule:
-    - cron: "0 13 * * *"
+#   schedule:
+#     - cron: "0 13 * * *"
 
-  workflow_dispatch:
+#   workflow_dispatch:
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
 
-      - name: Install Poetry
-        run: pipx install poetry
+#       - name: Install Poetry
+#         run: pipx install poetry
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.7"
-          cache: poetry
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10.7"
+#           cache: poetry
 
-      - uses: iterative/setup-dvc@v1
+#       - uses: iterative/setup-dvc@v1
 
-      - name: Install dependencies
-        run: |
-          poetry install --no-root --without dev
+#       - name: Install dependencies
+#         run: |
+#           poetry install --no-root --without dev
 
-      - name: Install pytest
-        run: pip install pytest
+#       - name: Install pytest
+#         run: pip install pytest
 
-      - name: Run tests
-        run: |
-          poetry run pytest 
+#       - name: Run tests
+#         run: |
+#           poetry run pytest 
 
-  fetch_air_data:
+#   fetch_air_data:
 
-    needs: test
+#     needs: test
 
-    runs-on: ubuntu-latest
+#     runs-on: ubuntu-latest
     
-    outputs:
-      sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
+#     outputs:
+#       sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
     
-    permissions:
-      contents: write
+#     permissions:
+#       contents: write
 
-    steps:    
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+#     steps:    
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
 
-      - name: Install Poetry
-        run: pipx install poetry
+#       - name: Install Poetry
+#         run: pipx install poetry
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.7"
-          cache: poetry
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10.7"
+#           cache: poetry
 
-      - name: Install dependencies
-        run: |
-          poetry install --no-root --without dev
+#       - name: Install dependencies
+#         run: |
+#           poetry install --no-root --without dev
 
-      - name: Install DVC
-        run: |
-          pip install dvc
+#       - name: Install DVC
+#         run: |
+#           pip install dvc
 
-      - name: Setup Dagshub
-        run: |
-          dvc remote modify origin --local auth basic
-          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
+#       - name: Setup Dagshub
+#         run: |
+#           dvc remote modify origin --local auth basic
+#           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+#           dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "anagasperin99@users.noreply.github.com"
+#       - name: Setup git config
+#         run: |
+#           git config user.name "GitHub Actions Bot"
+#           git config user.email "anagasperin99@users.noreply.github.com"
 
-      - name: Pull changes
-        run: |
-          git pull
-          dvc pull
+#       - name: Pull changes
+#         run: |
+#           git pull
+#           dvc pull
 
-      - name: Fetch data
-        run: poetry run python ./src/data/fetch_air_data.py
+#       - name: Fetch data
+#         run: poetry run python ./src/data/fetch_air_data.py
 
       
 
-      - name: Commit changes
-        run: |
-          git add data/raw/data.json
-          git commit -m 'Github Actions Bot Commit data'
+#       - name: Commit changes
+#         run: |
+#           git add data/raw/data.json
+#           git commit -m 'Github Actions Bot Commit data'
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+#       - name: Push changes
+#         uses: ad-m/github-push-action@master
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           branch: ${{ github.ref }}
 
-  preprocess_air_data:
+#   preprocess_air_data:
 
-    needs: fetch_air_data
+#     needs: fetch_air_data
 
-    runs-on: ubuntu-latest
+#     runs-on: ubuntu-latest
     
-    outputs:
-      sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
+#     outputs:
+#       sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
     
-    permissions:
-      contents: write
+#     permissions:
+#       contents: write
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
 
-      - name: Install Poetry
-        run: pipx install poetry
+#       - name: Install Poetry
+#         run: pipx install poetry
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.7"
-          cache: poetry
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10.7"
+#           cache: poetry
 
-      - name: Install dependencies
-        run: |
-          poetry install --no-root --without dev
+#       - name: Install dependencies
+#         run: |
+#           poetry install --no-root --without dev
 
-      - name: Install DVC
-        run: |
-          pip install dvc
+#       - name: Install DVC
+#         run: |
+#           pip install dvc
 
-      - name: Setup Dagshub
-        run: |
-          dvc remote modify origin --local auth basic
-          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
+#       - name: Setup Dagshub
+#         run: |
+#           dvc remote modify origin --local auth basic
+#           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+#           dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
-      - name: Setup Github
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "anagasperin99@users.noreply.github.com"
+#       - name: Setup Github
+#         run: |
+#           git config user.name "GitHub Actions Bot"
+#           git config user.email "anagasperin99@users.noreply.github.com"
 
-      - name: Pull changes
-        run: |
-          git pull
-          dvc pull
+#       - name: Pull changes
+#         run: |
+#           git pull
+#           dvc pull
 
-      - name: Process data
-        run: poetry run python ./src/data/preprocess_air_data.py
+#       - name: Process data
+#         run: poetry run python ./src/data/preprocess_air_data.py
 
-      - name: Commit changes
-        run: |
-          git add data/preprocessed/data_air.csv
-          git commit -m 'Github Actions Bot Commit data'
+#       - name: Commit changes
+#         run: |
+#           git add data/preprocessed/data_air.csv
+#           git commit -m 'Github Actions Bot Commit data'
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+#       - name: Push changes
+#         uses: ad-m/github-push-action@master
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           branch: ${{ github.ref }}
 
-  fetch_weather_data:
+#   fetch_weather_data:
   
-    needs: preprocess_air_data
+#     needs: preprocess_air_data
 
-    runs-on: ubuntu-latest
+#     runs-on: ubuntu-latest
     
-    outputs:
-      sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
+#     outputs:
+#       sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
     
-    permissions:
-      contents: write
+#     permissions:
+#       contents: write
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
 
-      - name: Install Poetry
-        run: pipx install poetry
+#       - name: Install Poetry
+#         run: pipx install poetry
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.7"
-          cache: poetry
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10.7"
+#           cache: poetry
 
-      - name: Install dependencies
-        run: |
-          poetry install --no-root --without dev
+#       - name: Install dependencies
+#         run: |
+#           poetry install --no-root --without dev
 
-      - name: Install DVC
-        run: |
-          pip install dvc
+#       - name: Install DVC
+#         run: |
+#           pip install dvc
 
-      - name: Setup Dagshub
-        run: |
-          dvc remote modify origin --local auth basic
-          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
+#       - name: Setup Dagshub
+#         run: |
+#           dvc remote modify origin --local auth basic
+#           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+#           dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "anagasperin99@users.noreply.github.com"
+#       - name: Setup git config
+#         run: |
+#           git config user.name "GitHub Actions Bot"
+#           git config user.email "anagasperin99@users.noreply.github.com"
 
-      - name: Pull changes
-        run: |
-          git pull
-          dvc pull
+#       - name: Pull changes
+#         run: |
+#           git pull
+#           dvc pull
 
-      - name: Fetch data
-        run: python ./src/data/fetch_weather_data.py
+#       - name: Fetch data
+#         run: python ./src/data/fetch_weather_data.py
 
-      - name: Commit changes
-        run: |
-          git add data/raw/weather/data.json
-          git commit -m 'Github Actions Bot Commit data'
+#       - name: Commit changes
+#         run: |
+#           git add data/raw/weather/data.json
+#           git commit -m 'Github Actions Bot Commit data'
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+#       - name: Push changes
+#         uses: ad-m/github-push-action@master
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           branch: ${{ github.ref }}
 
-  preprocess_weather_data:
+#   preprocess_weather_data:
   
-    needs: fetch_weather_data
+#     needs: fetch_weather_data
 
-    runs-on: ubuntu-latest
+#     runs-on: ubuntu-latest
     
-    outputs:
-      sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
+#     outputs:
+#       sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
     
-    permissions:
-      contents: write
+#     permissions:
+#       contents: write
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
 
-      - name: Install Poetry
-        run: pipx install poetry
+#       - name: Install Poetry
+#         run: pipx install poetry
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.7"
-          cache: poetry
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10.7"
+#           cache: poetry
 
-      - name: Install dependencies
-        run: |
-          poetry install --no-root --without dev
+#       - name: Install dependencies
+#         run: |
+#           poetry install --no-root --without dev
 
-      - name: Install DVC
-        run: |
-          pip install dvc
+#       - name: Install DVC
+#         run: |
+#           pip install dvc
 
-      - name: Setup Dagshub
-        run: |
-          dvc remote modify origin --local auth basic
-          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
+#       - name: Setup Dagshub
+#         run: |
+#           dvc remote modify origin --local auth basic
+#           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+#           dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "anagasperin99@users.noreply.github.com"
+#       - name: Setup git config
+#         run: |
+#           git config user.name "GitHub Actions Bot"
+#           git config user.email "anagasperin99@users.noreply.github.com"
 
-      - name: Pull changes
-        run: |
-          git pull
-          dvc pull
+#       - name: Pull changes
+#         run: |
+#           git pull
+#           dvc pull
 
-      - name: Process data
-        run: poetry run python ./src/data/preprocess_weather_data.py
+#       - name: Process data
+#         run: poetry run python ./src/data/preprocess_weather_data.py
 
-      - name: Check if data file has changed
-        id: check_changes
-        run: |
-          git diff --quiet data/preprocessed/data_we.csv || echo "::set-output name=CHANGED::true"
-        shell: bash
+#       - name: Check if data file has changed
+#         id: check_changes
+#         run: |
+#           git diff --quiet data/preprocessed/data_we.csv || echo "::set-output name=CHANGED::true"
+#         shell: bash
         
-      - name: Commit changes
-        if: steps.check_changes.outputs.CHANGED == 'true'
-        run: |
-          git add data/preprocessed/data_we.csv
-          git commit -m 'Github Actions Bot Commit data'
+#       - name: Commit changes
+#         if: steps.check_changes.outputs.CHANGED == 'true'
+#         run: |
+#           git add data/preprocessed/data_we.csv
+#           git commit -m 'Github Actions Bot Commit data'
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+#       - name: Push changes
+#         uses: ad-m/github-push-action@master
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           branch: ${{ github.ref }}
 
-  merge_processed_data:
+#   merge_processed_data:
   
-    needs: preprocess_weather_data
+#     needs: preprocess_weather_data
 
-    runs-on: ubuntu-latest
+#     runs-on: ubuntu-latest
     
-    outputs:
-      sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
+#     outputs:
+#       sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
     
-    permissions:
-      contents: write
+#     permissions:
+#       contents: write
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
 
-      - name: Install Poetry
-        run: pipx install poetry
+#       - name: Install Poetry
+#         run: pipx install poetry
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.7"
-          cache: poetry
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10.7"
+#           cache: poetry
 
-      - name: Install dependencies
-        run: |
-          poetry install --no-root --without dev
+#       - name: Install dependencies
+#         run: |
+#           poetry install --no-root --without dev
 
-      - name: Install DVC
-        run: |
-          pip install dvc
+#       - name: Install DVC
+#         run: |
+#           pip install dvc
 
-      - name: Setup Dagshub
-        run: |
-          dvc remote modify origin --local auth basic
-          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
+#       - name: Setup Dagshub
+#         run: |
+#           dvc remote modify origin --local auth basic
+#           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+#           dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "anagasperin99@users.noreply.github.com"
+#       - name: Setup git config
+#         run: |
+#           git config user.name "GitHub Actions Bot"
+#           git config user.email "anagasperin99@users.noreply.github.com"
 
-      - name: Pull changes
-        run: |
-          git pull
-          dvc pull
+#       - name: Pull changes
+#         run: |
+#           git pull
+#           dvc pull
 
-      - name: Process data
-        run: poetry run python ./src/data/merge_processed_data.py
+#       - name: Process data
+#         run: poetry run python ./src/data/merge_processed_data.py
 
-      - name: Commit changes
-        run: |
-          git add data/processed/current_data.csv
-          git commit -m 'Github Actions Bot Commit data'
+#       - name: Commit changes
+#         run: |
+#           git add data/processed/current_data.csv
+#           git commit -m 'Github Actions Bot Commit data'
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+#       - name: Push changes
+#         uses: ad-m/github-push-action@master
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           branch: ${{ github.ref }}
 
-  validate_data:
-    needs: merge_processed_data
-    runs-on: ubuntu-latest
-    outputs:
-      sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+#   validate_data:
+#     needs: merge_processed_data
+#     runs-on: ubuntu-latest
+#     outputs:
+#       sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
+#     permissions:
+#       contents: write
+#     steps:
+#       - uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
 
-      - name: Install Poetry
-        run: pipx install poetry
+#       - name: Install Poetry
+#         run: pipx install poetry
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.7"
-          cache: poetry
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10.7"
+#           cache: poetry
 
-      - name: Install dependencies
-        run: |
-          poetry install --no-root --without dev
+#       - name: Install dependencies
+#         run: |
+#           poetry install --no-root --without dev
 
-      - uses: iterative/setup-dvc@v1
+#       - uses: iterative/setup-dvc@v1
 
-      - name: Install DVC
-        run: |
-          pip install dvc
+#       - name: Install DVC
+#         run: |
+#           pip install dvc
 
-      - name: Setup Dagshub
-        run: |
-          dvc remote modify origin --local auth basic
-          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
+#       - name: Setup Dagshub
+#         run: |
+#           dvc remote modify origin --local auth basic
+#           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+#           dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "anagasperin99@users.noreply.github.com"
+#       - name: Setup git config
+#         run: |
+#           git config user.name "GitHub Actions Bot"
+#           git config user.email "anagasperin99@users.noreply.github.com"
 
-      - name: Pull changes
-        run: |
-          git pull
-          dvc pull
-      - name: Validate data
-        run: poetry run python ./src/data/data_validation.py
+#       - name: Pull changes
+#         run: |
+#           git pull
+#           dvc pull
+#       - name: Validate data
+#         run: poetry run python ./src/data/data_validation.py
 
-      - name: Deploy DataDocs to Netlify
-        uses: nwtgck/actions-netlify@v1.2
-        with:
-          publish-dir: "great_expectations/uncommitted/data_docs/local_site"
-          production-deploy: true
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+#       - name: Deploy DataDocs to Netlify
+#         uses: nwtgck/actions-netlify@v1.2
+#         with:
+#           publish-dir: "great_expectations/uncommitted/data_docs/local_site"
+#           production-deploy: true
+#         env:
+#           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
+#           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
          
-  test_stability_data:
-    needs: merge_processed_data
-    runs-on: ubuntu-latest
-    outputs:
-      sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+#   test_stability_data:
+#     needs: merge_processed_data
+#     runs-on: ubuntu-latest
+#     outputs:
+#       sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
+#     permissions:
+#       contents: write
+#     steps:
+#       - uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
 
-      - name: Install Poetry
-        run: pipx install poetry
+#       - name: Install Poetry
+#         run: pipx install poetry
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.7"
-          cache: poetry
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10.7"
+#           cache: poetry
 
-      - name: Install dependencies
-        run: |
-          poetry install --no-root --without dev
+#       - name: Install dependencies
+#         run: |
+#           poetry install --no-root --without dev
 
-      - uses: iterative/setup-dvc@v1
+#       - uses: iterative/setup-dvc@v1
       
-      - name: Install DVC
-        run: |
-          pip install dvc
+#       - name: Install DVC
+#         run: |
+#           pip install dvc
 
-      - name: Setup Dagshub
-        run: |
-          dvc remote modify origin --local auth basic
-          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
+#       - name: Setup Dagshub
+#         run: |
+#           dvc remote modify origin --local auth basic
+#           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+#           dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "anagasperin99@users.noreply.github.com"
+#       - name: Setup git config
+#         run: |
+#           git config user.name "GitHub Actions Bot"
+#           git config user.email "anagasperin99@users.noreply.github.com"
 
-      - name: Pull changes
-        run: |
-          git pull
-          dvc pull
+#       - name: Pull changes
+#         run: |
+#           git pull
+#           dvc pull
 
-      - name: Test data stability
-        run: poetry run python ./src/data/data_stability.py
+#       - name: Test data stability
+#         run: poetry run python ./src/data/data_stability.py
 
-      - name: Commit changes
-        run: |
-          git add .
-          git commit -m 'Github Actions Bot Commit data'
-          git push
+#       - name: Commit changes
+#         run: |
+#           git add .
+#           git commit -m 'Github Actions Bot Commit data'
+#           git push
 
-  post_data_pipeline_actions:
-    needs: [test_stability_data, validate_data]
-    runs-on: ubuntu-latest
-    outputs:
-      sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Install Poetry
-        run: pipx install poetry
+#   post_data_pipeline_actions:
+#     needs: [test_stability_data, validate_data]
+#     runs-on: ubuntu-latest
+#     outputs:
+#       sha_new: ${{steps.sha_new.outputs.SHA_NEW}}
+#     permissions:
+#       contents: write
+#     steps:
+#       - uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
+#       - name: Install Poetry
+#         run: pipx install poetry
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.7"
-          cache: poetry
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10.7"
+#           cache: poetry
 
-      - name: Install dependencies
-        run: |
-          poetry install --no-root --without dev
+#       - name: Install dependencies
+#         run: |
+#           poetry install --no-root --without dev
 
-      - uses: iterative/setup-dvc@v1
+#       - uses: iterative/setup-dvc@v1
 
-      - name: Install DVC
-        run: |
-          pip install dvc
+#       - name: Install DVC
+#         run: |
+#           pip install dvc
 
-      - name: Setup Dagshub
-        run: |
-          dvc remote modify origin --local auth basic
-          dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
-          dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
+#       - name: Setup Dagshub
+#         run: |
+#           dvc remote modify origin --local auth basic
+#           dvc remote modify origin --local user ${{ secrets.DAGSHUB_USERNAME }}
+#           dvc remote modify origin --local password ${{ secrets.DAGSHUB_PASS }}
 
-      - name: Setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "anagasperin99@users.noreply.github.com"
+#       - name: Setup git config
+#         run: |
+#           git config user.name "GitHub Actions Bot"
+#           git config user.email "anagasperin99@users.noreply.github.com"
 
-      - name: Pull changes
-        run: |
-          git pull
-          dvc pull
+#       - name: Pull changes
+#         run: |
+#           git pull
+#           dvc pull
 
-      - name: Post data pipeline actions
-        run: |
-          poetry run python ./src/data/update_reference.py
-          poetry run python ./src/data/split_train_test.py
+#       - name: Post data pipeline actions
+#         run: |
+#           poetry run python ./src/data/update_reference.py
+#           poetry run python ./src/data/split_train_test.py
 
-      - name: Commit changes
-        run: |
-          git rm -r --cached 'data'
-          git commit -m "stop tracking data"
-          dvc add data
-          git add .
-          git commit -m 'Github Actions Bot Commit data'
-          git push
-          dvc push -r origin
+#       - name: Commit changes
+#         run: |
+#           git rm -r --cached 'data'
+#           git commit -m "stop tracking data"
+#           dvc add data
+#           git add .
+#           git commit -m 'Github Actions Bot Commit data'
+#           git push
+#           dvc push -r origin
